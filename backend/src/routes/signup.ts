@@ -54,6 +54,7 @@ signRouter.post("/", async (_, res) => {
     const user: User = {
       email,
       password: hashedPassword,
+      avatar: null,
     };
 
     const insert = await db.collection(Collections.USERS).insertOne(user);

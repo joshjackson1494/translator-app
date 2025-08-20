@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent, FormEvent } from "react";
 import "./LoginScreen.css";
 import { BACKEND_URL } from "../../../constants";
 import { useNavigate } from "react-router-dom";
+import { User } from "../../../types";
 
 interface LoginFormData {
   email: string;
@@ -33,6 +34,7 @@ const LoginScreen: React.FC = () => {
 
   // UI state
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showSignUpModal, setShowSignUpModal] = useState<boolean>(false);
   const [signUpError, setSignUpError] = useState<string | null>(null);
@@ -82,9 +84,8 @@ const LoginScreen: React.FC = () => {
 
       console.log(data);
 
-      if (data.email) {
-        localStorage.setItem("user", data.email);
-      }
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
       alert(`Login successful for ${loginData.email}`);
       navigate("/text");
     } catch (err) {

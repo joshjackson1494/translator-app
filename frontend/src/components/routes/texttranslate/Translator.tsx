@@ -2,6 +2,8 @@ import React, { useState, ChangeEvent } from "react";
 import "./Translator.css";
 import { Dropdown } from "react-bootstrap";
 import profileImage from "../../../assets/images/grag.png";
+import { User } from "../../../types";
+import { useNavigate } from "react-router-dom";
 
 // Type definitions
 interface Language {
@@ -10,11 +12,16 @@ interface Language {
 }
 
 const Translator: React.FC = () => {
+  const navigate = useNavigate();
   const [inputText, setInputText] = useState<string>("");
+  const [user, setUser] = useState<User | null>(null);
   const [userAvatar, setUserAvatar] = useState<string>("/default-avatar.jpg");
   const [outputText, setOutputText] = useState<string>("");
   const [sourceLanguage, setSourceLanguage] = useState<string>("en");
   const [targetLanguage, setTargetLanguage] = useState<string>("jp");
+
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) setUser(JSON.parse(storedUser));
 
   // Languages list
   const languages: Language[] = [
@@ -65,12 +72,14 @@ const Translator: React.FC = () => {
 
   const handleSignOut = (): void => {
     console.log("Sign out clicked");
-    // Add your sign out logic here
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/");
   };
 
   const handleSettings = (): void => {
     console.log("Settings clicked");
-    // Add your settings logic here
+    navigate("/settings");
   };
 
   // Custom toggle component for the avatar
@@ -228,3 +237,6 @@ const Translator: React.FC = () => {
 };
 
 export default Translator;
+function useUser(): [any] {
+  throw new Error("Function not implemented.");
+}
