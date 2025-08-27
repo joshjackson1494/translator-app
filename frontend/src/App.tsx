@@ -1,4 +1,4 @@
-// App.tsx
+// App.tsx JOSHUA JACKSON
 import React from "react";
 import Translator from "./components/routes/texttranslate/Translator";
 import LoginScreen from "./components/routes/login/LoginScreen";
