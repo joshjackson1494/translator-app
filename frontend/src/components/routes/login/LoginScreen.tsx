@@ -92,7 +92,6 @@ const LoginScreen: React.FC = () => {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setIsLoading(false);
-      // navigate("/text");
     }
   };
 

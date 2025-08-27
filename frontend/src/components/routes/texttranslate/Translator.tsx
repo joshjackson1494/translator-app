@@ -4,6 +4,8 @@ import { Dropdown } from "react-bootstrap";
 import profileImage from "../../../assets/images/grag.png";
 import { User } from "../../../types";
 import { useNavigate } from "react-router-dom";
+import { BACKEND_URL } from "../../../constants";
+import { set } from "zod";
 
 // Type definitions
 interface Language {
@@ -13,12 +15,14 @@ interface Language {
 
 const Translator: React.FC = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [inputText, setInputText] = useState<string>("");
   const [user, setUser] = useState<User | null>(null);
   const [userAvatar, setUserAvatar] = useState<string>("/default-avatar.jpg");
   const [outputText, setOutputText] = useState<string>("");
   const [sourceLanguage, setSourceLanguage] = useState<string>("en");
-  const [targetLanguage, setTargetLanguage] = useState<string>("jp");
+  const [targetLanguage, setTargetLanguage] = useState<string>("ja");
 
   const storedUser = localStorage.getItem("user");
   if (storedUser) setUser(JSON.parse(storedUser));
@@ -26,7 +30,7 @@ const Translator: React.FC = () => {
   // Languages list
   const languages: Language[] = [
     { code: "en", name: "English" },
-    { code: "jp", name: "Japanese" },
+    { code: "ja", name: "Japanese" },
   ];
 
   const handleInputChange = (e: ChangeEvent<HTMLTextAreaElement>): void => {
@@ -45,12 +49,42 @@ const Translator: React.FC = () => {
     setTargetLanguage(e.target.value);
   };
 
-  const handleTranslate = (): void => {
+  const handleTranslate = async (): Promise<void> => {
     // This is just a placeholder for the actual translation
     // In a real app, this would call an API
-    setOutputText(
-      `[This would be the translation of "${inputText}" from ${sourceLanguage} to ${targetLanguage}]`
-    );
+    setIsLoading(true);
+    setError(null);
+    try {
+      const translatePayload = {
+        text: inputText,
+        target: targetLanguage,
+      };
+
+      const response = await fetch(`${BACKEND_URL}/api/text`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(translatePayload),
+      });
+
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
+
+      console.log(data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to translate");
+      }
+      const translatedText = data.data || "Translation failed";
+      console.log(translatedText);
+      setOutputText(translatedText);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "translate failed");
+      console.error("Translation error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const swapLanguages = (): void => {
@@ -107,17 +141,10 @@ const Translator: React.FC = () => {
         {/* Profile Dropdown */}
         <div className="profile-dropdown-container">
           <Dropdown>
-            <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
-              <img
-                src="placeholder"
-                alt={profileImage}
-                className="profile-avatar"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    "https://via.placeholder.com/40";
-                }}
-              />
-            </Dropdown.Toggle>
+            <Dropdown.Toggle
+              as={CustomToggle}
+              id="dropdown-custom-components"
+            ></Dropdown.Toggle>
 
             <Dropdown.Menu align="end" className="profile-dropdown-menu">
               <Dropdown.Item
